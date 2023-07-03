@@ -204,7 +204,7 @@ def UNet128():
 #hyperparameter
 #ATENCAO 512 trava o PC
 image_size = 512
-train_path = "./data-1024x1024 remade/"; #address of the dataset
+train_path = "./data-1024x1024/"; #address of the dataset
 batch_size = 10
 epochs = 3000
 
@@ -233,7 +233,7 @@ print("image_size:", image_size)
 print(epochs)
 versao = 1
 
-_fileName = "/cells-s%d-e%d-v%d-tf241.h5"
+_fileName = "cells-s%d-e%d-v%d-tf241.h5"
 filename = _fileName % (image_size, epochs, versao)
 
 print("filename:",filename)
