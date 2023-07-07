@@ -261,43 +261,6 @@ unet_model.evaluate(valid_gen)
 # PREDICT
 
 
-# # PREDICT
-
-# In[9]:
-
-
-def display(display_list):
-    plt.figure(figsize=(15, 15))
-    title = ["Input Image", "True Mask", "Predicted Mask"]
-    for i in range(len(display_list)):
-        plt.subplot(1, len(display_list), i+1)
-        plt.title(title[i])
-        plt.imshow(display_list[i])
-        #plt.imshow(tf.keras.utils.array_to_img(display_list[i]))
-        plt.axis("off")
-    plt.show()
-
-def create_mask(pred_mask):
-    #print(pred_mask)
-#     pred_mask = tf.argmax(pred_mask, axis=-1)
-#     pred_mask = pred_mask[..., tf.newaxis]
-#     return pred_mask
-    #pred_mask2 = pred_mask.copy()
-    pred_mask2 = cv2.cvtColor(pred_mask, cv2.COLOR_BGR2GRAY)
-    pred_mask2[pred_mask2 < 0.3] = 0
-    pred_mask2[np.logical_and(pred_mask2 >= 0.3, pred_mask2 <= 0.8)] = 1
-    pred_mask2[pred_mask2 > 0.8] = 2
-    pred_mask2 = pred_mask2.astype(int)
-    return pred_mask2
-    
-## Dataset for prediction
-p_image, p_mask = train_gen.__getitem__(0); #accessed as normalised bool
-pred_mask = unet_model.predict(p_image)
-display([p_image[0], p_mask[0], create_mask(pred_mask[0])])
-
-
-# In[ ]:
-
 
 
 

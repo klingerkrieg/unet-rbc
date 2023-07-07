@@ -288,6 +288,7 @@ model.summary()
 
 
 batch_size = 10
+save_period = 50
 train_gen = DataGen(train_ids, train_path, image_size=image_size, batch_size=batch_size);
 valid_gen = DataGen(valid_ids, train_path, image_size=image_size, batch_size=batch_size);
 print_log("total training batches: ", len(train_gen));
@@ -295,6 +296,7 @@ print_log("total validaton batches: ", len(valid_gen));
 train_steps = len(train_ids)//batch_size;
 valid_steps = len(valid_ids)//batch_size;
 print_log("image_size:", image_size)
+print_log("save_period:", save_period)
 epochs = 1000
 print_log(epochs)
 versao = 1
@@ -347,166 +349,4 @@ impHistoria(history)
 model.evaluate(valid_gen)
 
 
-# In[ ]:
-
-
-# PREDICT
-
-
 # # PREDICT
-
-# In[14]:
-
-
-## Dataset for prediction
-p_image, p_mask = train_gen.__getitem__(0); #accessed as normalised bool
-
-print("shape image: ", p_image.shape, "shape mask: ", p_mask.shape)
-
-result_mask = model.predict(p_image); #collection of 10 masks
-
-print("result_mask shape: ", result_mask.shape);
-result_mask = result_mask > 0.50; #float probability to bool conversion
-
-plt.imshow(np.reshape(result_mask[0]*255, (image_size, image_size)), cmap="gray")
-plt.show()
-
-
-
-
-# In[15]:
-
-
-## Dataset for prediction
-p_image, p_mask = train_gen.__getitem__(0); #accessed as normalised bool
-
-print("shape image: ", p_image.shape, "shape mask: ", p_mask.shape)
-
-result_mask = model.predict(p_image); #collection of 10 masks
-
-print("result_mask shape: ", result_mask.shape);
-result_mask = result_mask > 0.50; #float probability to bool conversion
-
-plt.imshow(np.reshape(result_mask[0]*255, (image_size, image_size)), cmap="gray")
-plt.show()
-
-
-
-
-# In[16]:
-
-
-fig1 = plt.figure(figsize=(20,20))
-fig.subplots_adjust(hspace=.4, wspace=.6)
-i = 0;
-my_plot = fig1.add_subplot(1, 3, 1)
-plt.title("Input mask")
-plt.xticks(color='w')
-plt.yticks(color='w')
-my_plot.imshow(np.reshape(p_mask[i]*255, (image_size, image_size)), cmap="gray")
-
-my_plot = fig1.add_subplot(1, 3, 2);
-p_image2 = p_image[i][:,:,::-1]
-my_plot.imshow(p_image2);
-plt.xticks(color='w')
-plt.yticks(color='w')
-plt.title("Input image")
-
-my_plot = fig1.add_subplot(1, 3, 3)
-my_plot.imshow(np.reshape(result_mask[i]*255, (image_size, image_size)), cmap="gray")
-plt.xticks(color='w')
-plt.yticks(color='w')
-plt.title("Predicted mask")
-
-
-# In[17]:
-
-
-def load_img_norm(image_path, image_size):
-        image = cv2.imread(image_path, 1); #reading image to image vaiable
-        image = cv2.resize(image, (image_size, image_size));# resizing input image to 128 * 128
-        #image normalisation
-        image = image / 255.0;
-        
-        image_r = []
-        image_r.append(image);
-        image_r = np.array(image_r);
-        return image_r;
-
-## Dataset for prediction
-#p_image = load_img_norm(gdrive+"/data-1024x1024/images/blood_smear_3.JPG",image_size)
-p_image = load_img_norm("../pyAnnotation/malaria_broadinstitute_relabeled-1/train/images/03c8da48-04b9-4520-b674-44a0ecd35688_png.rf.1af68d1c0d903f6e5e13aa4ff2665e6e.jpg",image_size)
-
-
-result_mask = model.predict(p_image); #collection of 10 masks
-
-print("result_mask shape: ", result_mask.shape);
-
-#plt.imshow(np.reshape(result_mask[0]*255, (image_size, image_size)), cmap="gray")
-#plt.show()
-
-result_mask = result_mask > 0.30; #float probability to bool conversion
-
-fig, ax = plt.subplots(ncols=2, figsize=(20,20))
-
-res = p_image[0][:,:,::-1]
-ax[0].imshow(res);
-ax[0].title.set_text("Input image")
-
-ax[1].imshow(np.reshape(result_mask[0]*255, (image_size, image_size)), cmap="gray")
-ax[1].title.set_text("Predicted mask")
-
-
-# In[88]:
-
-
-inputs = keras.layers.Input((128, 128, 3))
-c = keras.layers.Conv2D(64, (3,3), padding='same', strides=1, activation="relu")(inputs)
-w = c.node.layer.get_weights()
-w = w[0][0][0][0]
-plt.plot(w)
-plt.show()
-
-print (min(w), max(w))
-
-
-# In[89]:
-
-
-for i in range(10,31):
-    image = cv2.imread(gdrive+"/data-1024x1024/masks/blood_smear_%d.png" % i)
-    hist = cv2.calcHist([image], [0], None, [256], [0, 256])
-
-    print("blood_smear_%d.png" % i)
-    hist /= hist.sum()
-    for i in range(256):
-        if hist[i][0] > 0:
-            print(i,end=",")
-    print("")
-
-
-# In[90]:
-
-
-image = cv2.imread(gdrive+"/data-1024x1024/masks/blood_smear_1.png")
-hist = cv2.calcHist([image], [0], None, [256], [0, 256])
-
-hist /= hist.sum()
-for i in range(256):
-    if hist[i][0] > 0:
-        print(i)
-# plot the normalized histogram
-plt.figure()
-plt.title("Grayscale Histogram (Normalized)")
-plt.xlabel("Bins")
-plt.ylabel("% of Pixels")
-plt.plot(hist)
-plt.xlim([0, 256])
-plt.show()
-
-
-# In[ ]:
-
-
-
-
