@@ -102,9 +102,6 @@ BATCH_SIZE = 10
 image_size = 512
 mask_size  = None
 NUM_EPOCHS = 10
-TRAIN_LENGTH = 30
-VAL_SUBSPLITS = 5
-TEST_LENGTH = 30
 
 train_path = "./data-1024x1024-border"; #address of the dataset
 train_ids = os.listdir(train_path + "/images")
@@ -187,14 +184,16 @@ def build_unet_model(input_size=(128,128,3)):
     # 9 - upsample
     u9 = upsample_block(u8, f1, 64)
     # outputs
-    outputs = layers.Conv2D(3, 1, padding="same", activation = "softmax")(u9)
+    #outputs = layers.Conv2D(3, 1, padding="same", activation = "softmax")(u9)
+    outputs = layers.Conv2D(3, 1, padding="same", activation = "sigmoid")(u9)
     # unet model with Keras Functional API
     unet_model = tf.keras.Model(inputs, outputs, name="U-Net")
     return unet_model
 
 
 unet_model = build_unet_model(input_size = (512,512,3))
-
+unet_model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["acc"])
+unet_model.summary()
 
 # In[6]:
 
@@ -211,7 +210,7 @@ print_log("epochs:",NUM_EPOCHS)
 print_log("save_period:",save_period)
 versao = 1
 
-_fileName = "./unet2-s%d-e%d-v%d-tf241.h5"
+_fileName = "./unet2-s%d-e%d-v%d-tf241-sig.h5"
 filename = _fileName % (image_size, NUM_EPOCHS, versao)
 
 print_log("filename:",filename)
